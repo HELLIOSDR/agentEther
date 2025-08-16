@@ -1,4 +1,3 @@
-# Eter Hybrid Integration Workflow (Improved Version)
 name: Eter Hybrid Integration Workflow
 
 on:
@@ -96,4 +95,15 @@ jobs:
         if: github.event_name == 'push'
         run: |
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-          ANALYSIS_FILE="business_analysis_${TIMESTAMP
+          ANALYSIS_FILE="business_analysis_${TIMESTAMP}.txt"
+          
+          # Zapisz analizę do pliku
+          echo "${{ steps.analizaBiznesowa.outputs.analysis_result }}" > $ANALYSIS_FILE
+          
+          # Utwórz gałąź 'analysis-branch' (jeśli jeszcze nie istnieje)
+          git checkout -b analysis-branch || git checkout analysis-branch
+          
+          # Dodaj plik do repozytorium i wykonaj commit
+          git add $ANALYSIS_FILE
+          git commit -m "Dodano analizę biznesową z dnia $TIMESTAMP"
+          git push origin analysis-branch
