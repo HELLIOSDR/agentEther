@@ -49,20 +49,25 @@ jobs:
       - name: Instalacja jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      # 4. Wywołanie Perplexity z kontekstem zmian
+      # 4. Wywołanie Perplexity z kontekstem zmian (POPRAWIONY KROK)
       - name: Analiza biznesowa zmian w Perplexity
         id: analizaBiznesowa
         run: |
+          # Pobranie diff do zmiennej środowiskowej dla czytelności
+          DIFF_CONTENT="${{ steps.get_diff.outputs.diff_content }}"
+
           # Bezpieczne budowanie zapytania JSON przy użyciu jq
+          # Przekazujemy diff jako oddzielny argument (--arg diff_data),
+          # a następnie łączymy go z resztą tekstu wewnątrz samego jq.
           JSON_PAYLOAD=$(jq -n \
             --arg model "sonar-medium-32k-online" \
             --arg system_prompt "Jesteś Eterem, ekspertem od analizy kontekstu biznesowego. Twoim zadaniem jest zwięzła analiza przedstawionych zmian w kodzie (w formacie 'diff'). Skoncentruj się na potencjalnej wartości biznesowej, ryzykach i zasugeruj możliwe ulepszenia." \
-            --arg user_prompt "Przeanalizuj poniższe zmiany w kodzie i przedstaw swoją ocenę:\n\n\`\`\`diff\n${{ steps.get_diff.outputs.diff_content }}\n\`\`\`" \
+            --arg diff_data "$DIFF_CONTENT" \
             '{
               model: $model,
               messages: [
                 {role: "system", content: $system_prompt},
-                {role: "user", content: $user_prompt}
+                {role: "user", content: ("Przeanalizuj poniższe zmiany w kodzie i przedstaw swoją ocenę:\n\n```diff\n" + $diff_data + "\n```")}
               ]
             }')
 
@@ -101,7 +106,10 @@ jobs:
           echo "${{ steps.analizaBiznesowa.outputs.analysis_result }}" > $ANALYSIS_FILE
           
           # Utwórz gałąź 'analysis-branch' (jeśli jeszcze nie istnieje)
-          git checkout -b analysis-branch || git checkout analysis-branch
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git fetch
+          git checkout -b analysis-branch origin/analysis-branch || git checkout -b analysis-branch || git checkout analysis-branch
           
           # Dodaj plik do repozytorium i wykonaj commit
           git add $ANALYSIS_FILE
