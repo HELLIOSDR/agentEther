@@ -16,19 +16,19 @@ jobs:
       - name: Pobranie repozytorium
         uses: actions/checkout@v3
 
-      # 2. Zainstaluj Node.js
+      # 2. Zainstaluj Node.js (potrzebne, aby łatwo doinstalować jq)
       - name: Instalacja Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # 3. Zainstaluj jq
+      # 3. Zainstaluj jq – program do formatowania JSON-a
       - name: Instalacja jq
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
 
-      # 4. Zainstaluj Pythona
+      # 4. Zainstaluj Pythona – przyda się w przyszłości
       - name: Instalacja Pythona
         uses: actions/setup-python@v4
         with:
@@ -38,7 +38,7 @@ jobs:
       - name: Instalacja biblioteki requests
         run: pip install requests
 
-      # 6. Wywołaj Perplexity
+      # 6. Wywołaj Perplexity i zapisz odpowiedź do zmiennej
       - name: Analiza biznesowa w Perplexity
         id: analizaBiznesowa
         run: |
@@ -48,31 +48,38 @@ jobs:
             -d '{
                   "model": "gpt-4o",
                   "messages": [
-                    {
-                      "role": "system",
-                      "content": "Jesteś Eterem, ekspertem od analizy kontekstu biznesowego."
-                    },
-                    {
-                      "role": "user",
-                      "content": "Przeanalizuj ostatnie zmiany w tym repozytorium i zasugeruj ulepszenia pod kątem wartości biznesowej."
-                    }
+                    { "role": "system",
+                      "content": "Jesteś Eterem, ekspertem od analizy kontekstu biznesowego." },
+                    { "role": "user",
+                      "content": "Przeanalizuj ostatnie zmiany w tym repozytorium i zasugeruj ulepszenia pod kątem wartości biznesowej." }
                   ]
                 }')
-          echo "businessAnalysisResult<<EOF"           >> "$GITHUB_OUTPUT"
-          echo "$ODPOWIEDZ"                            >> "$GITHUB_OUTPUT"
-          echo "EOF"                                   >> "$GITHUB_OUTPUT"
+          echo "businessAnalysisResult<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$ODPOWIEDZ"                             >> "$GITHUB_OUTPUT"
+          echo "EOF"                                    >> "$GITHUB_OUTPUT"
 
-      # 7. Zapisz wynik do pliku i wypchnij na analysis-branch
+      # 7. Zapisz wynik do pliku JSON i wypchnij na gałąź analysis-branch
       - name: Zapis i commit pliku z analizą
         run: |
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
-echo "${{ steps.analizaBiznesowa.outputs.businessAnalysisResult }}" \
-  | jq . > business_analysis_${TIMESTAMP}.json
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
-git config user.name  "Eter-Bot"
-git config user.email "eter@ai.local"
 
-git add business_analysis_${TIMESTAMP}.json
-git commit -m "Dodano wynik analizy biznesowej (${TIMESTAMP})" || echo "Brak nowych plików"
-git push origin HEAD:analysis-branch
+          echo "${{ steps.analizaBiznesowa.outputs.businessAnalysisResult }}" \
+  
+          | jq . > business_analysis_${TIMESTAMP}.json
+
+
+          git config user.name  "Eter-Bot"
+
+          git config user.email "eter@ai.local"
+
+
+          git add business_analysis_${TIMESTAMP}.json
+
+          git commit -m "Dodano wynik analizy biznesowej (${TIMESTAMP})" || echo "Brak nowych plików"
+
+          git push origin HEAD:analysis-branch
+
+          git commit -m "Dodano wynik analizy biznesowej (${TIMESTAMP})" || echo "Brak nowych plików"
+          
