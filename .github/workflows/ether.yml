@@ -1,53 +1,71 @@
-// Webhook handler - gdy ChatGPT zmienia kod
-app.post('/github-webhook', (req, res) => {
-  // ChatGPT just committed code
-  const changes = req.body;
-  
-  // Call Perplexity to analyze changes
-  fetch('https://api.perplexity.ai/chat/completions', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer YOUR_KEY' },
-    body: JSON.stringify({
-      messages: [{
-        role: 'user', 
-        content: `Analyze this code change for business impact: ${changes}`
-      }]
-    })
-  });
-});
-# This is a basic workflow to help you get started with Actions
+name: Eter Hybrid Integration Workflow
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  businessIntelligenceAnalysis:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      # 1. Pobierz wszystkie pliki repozytorium
+      - name: Pobranie repozytorium
+        uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      # 2. Zainstaluj Node.js (potrzebne, aby łatwo doinstalować jq)
+      - name: Instalacja Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      # 3. Zainstaluj jq – program do formatowania JSON-a
+      - name: Instalacja jq
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      # 4. Zainstaluj Pythona – przyda się w przyszłości
+      - name: Instalacja Pythona
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 5. (Opcjonalnie) zainstaluj bibliotekę requests
+      - name: Instalacja biblioteki requests
+        run: pip install requests
+
+      # 6. Wywołaj Perplexity i zapisz odpowiedź do zmiennej
+      - name: Analiza biznesowa w Perplexity
+        id: analizaBiznesowa
+        run: |
+          ODPOWIEDZ=$(curl -s -X POST https://api.perplexity.ai/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.PERPLEXITY_API_KEY }}" \
+            -d '{
+                  "model": "gpt-4o",
+                  "messages": [
+                    { "role": "system",
+                      "content": "Jesteś Eterem, ekspertem od analizy kontekstu biznesowego." },
+                    { "role": "user",
+                      "content": "Przeanalizuj ostatnie zmiany w tym repozytorium i zasugeruj ulepszenia pod kątem wartości biznesowej." }
+                  ]
+                }')
+          echo "businessAnalysisResult<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$ODPOWIEDZ"                             >> "$GITHUB_OUTPUT"
+          echo "EOF"                                    >> "$GITHUB_OUTPUT"
+
+      # 7. Zapisz wynik do pliku JSON i wypchnij na gałąź analysis-branch
+      - name: Zapis i commit pliku z analizą
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
+          echo "${{ steps.analizaBiznesowa.outputs.businessAnalysisResult }}" | jq . > business_analysis_${TIMESTAMP}.json
+
+          git config user.name  "Eter-Bot"
+          git config user.email "eter@ai.local"
+          git add business_analysis_${TIMESTAMP}.json
+          git commit -m "Dodano wynik analizy biznesowej (${TIMESTAMP})" || echo "Brak nowych plików"
+          git push origin HEAD:analysis-branch
