@@ -1,3 +1,4 @@
+# Eter Hybrid Integration Workflow (Improved Version)
 name: Eter Hybrid Integration Workflow
 
 on:
@@ -8,72 +9,91 @@ on:
     branches:
       - main
 
+# Prevent the bot's own commits from triggering the workflow again
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   businessIntelligenceAnalysis:
     runs-on: ubuntu-latest
+    # Grant permissions for the workflow to write comments on PRs and push to a branch
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
-      # 1. Pobierz pliki repozytorium
+      # 1. Pobierz pliki repozytorium (z pełną historią, żeby móc porównać zmiany)
       - name: Pobranie repozytorium
-        uses: actions/checkout@v3
-
-      # 2. Node.js (żeby łatwo doinstalować jq)
-      - name: Instalacja Node.js
-        uses: actions/setup-node@v3
+        uses: actions/checkout@v4
         with:
-          node-version: '18'
+          # Fetch all history for all branches and tags
+          fetch-depth: 0
 
-      # 3. jq – formatowanie JSON
-      - name: Instalacja jq
+      # 2. Wyodrębnij zmiany w kodzie (diff)
+      - name: Ustalenie zmian w kodzie
+        id: get_diff
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Diff dla Pull Request: porównanie gałęzi PR z gałęzią docelową (main)
+            DIFF_CONTENT=$(git diff "origin/${{ github.base_ref }}" "origin/${{ github.head_ref }}")
+          else
+            # Diff dla Push: porównanie ostatniego commita (HEAD) z poprzednim (HEAD~1)
+            DIFF_CONTENT=$(git diff HEAD~1 HEAD)
+          fi
+          # Zapisanie diff do zmiennej wyjściowej kroku
+          echo "diff_content<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$DIFF_CONTENT" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
-      # 4. Python (na przyszłość)
-      - name: Instalacja Pythona
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+      # 3. Instalacja jq do obsługi formatu JSON
+      - name: Instalacja jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
-      # 5. (opcjonalnie) requests
-      - name: Instalacja biblioteki requests
-        run: pip install requests
-
-      # 6. Wywołanie Perplexity
-      - name: Analiza biznesowa w Perplexity
+      # 4. Wywołanie Perplexity z kontekstem zmian
+      - name: Analiza biznesowa zmian w Perplexity
         id: analizaBiznesowa
         run: |
-          ODPOWIEDZ=$(curl -s -X POST https://api.perplexity.ai/chat/completions \
+          # Bezpieczne budowanie zapytania JSON przy użyciu jq
+          JSON_PAYLOAD=$(jq -n \
+            --arg model "sonar-medium-32k-online" \
+            --arg system_prompt "Jesteś Eterem, ekspertem od analizy kontekstu biznesowego. Twoim zadaniem jest zwięzła analiza przedstawionych zmian w kodzie (w formacie 'diff'). Skoncentruj się na potencjalnej wartości biznesowej, ryzykach i zasugeruj możliwe ulepszenia." \
+            --arg user_prompt "Przeanalizuj poniższe zmiany w kodzie i przedstaw swoją ocenę:\n\n\`\`\`diff\n${{ steps.get_diff.outputs.diff_content }}\n\`\`\`" \
+            '{
+              model: $model,
+              messages: [
+                {role: "system", content: $system_prompt},
+                {role: "user", content: $user_prompt}
+              ]
+            }')
+
+          # Wywołanie API i wyodrębnienie odpowiedzi
+          RESPONSE_CONTENT=$(curl -s -X POST https://api.perplexity.ai/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.PERPLEXITY_API_KEY }}" \
-            -d '{
-                  "model": "gpt-4o",
-                  "messages": [
-                    {
-                      "role": "system",
-                      "content": "Jesteś Eterem, ekspertem od analizy kontekstu biznesowego."
-                    },
-                    {
-                      "role": "user",
-                      "content": "Przeanalizuj ostatnie zmiany w tym repozytorium i zasugeruj ulepszenia pod kątem wartości biznesowej."
-                    }
-                  ]
-                }')
-          echo "businessAnalysisResult<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$ODPOWIEDZ"                  >> "$GITHUB_OUTPUT"
-          echo "EOF"                         >> "$GITHUB_OUTPUT"
+            -d "$JSON_PAYLOAD" | jq -r '.choices[0].message.content')
 
-      # 7. Zapis pliku i push na analysis-branch
+          # Zapisanie czystej odpowiedzi do zmiennej wyjściowej
+          echo "analysis_result<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$RESPONSE_CONTENT" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      # 5. Opublikuj analizę jako komentarz w Pull Request
+      - name: Publikacja komentarza w Pull Request
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### 🤖 Analiza Biznesowa (Eter)\n\n---\n\n${{ steps.analizaBiznesowa.outputs.analysis_result }}`
+            })
+
+      # 6. Zapisz analizę do pliku w gałęzi 'analysis-branch' (dla push na main)
       - name: Zapis i commit pliku z analizą
+        if: github.event_name == 'push'
         run: |
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-
-          echo "${{ steps.analizaBiznesowa.outputs.businessAnalysisResult }}" \
-            | jq . > business_analysis_${TIMESTAMP}.json
-
-          git config user.name  "Eter-Bot"
-          git config user.email "eter@ai.local"
-
-          git add business_analysis_${TIMESTAMP}.json
-          git commit -m "Dodano wynik analizy biznesowej (${TIMESTAMP})" \
-            || echo "Brak nowych plików"
-          git push origin HEAD:analysis-branch
+          ANALYSIS_FILE="business_analysis_${TIMESTAMP
