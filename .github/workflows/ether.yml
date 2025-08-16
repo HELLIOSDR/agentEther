@@ -61,15 +61,10 @@ jobs:
       # 7. Zapisz wynik do pliku JSON i wypchnij na gałąź analysis-branch
       - name: Zapis i commit pliku z analizą
         run: |
-
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-
-echo "${{ steps.analizaBiznesowa.outputs.businessAnalysisResult }}" \
-  | jq . > business_analysis_${TIMESTAMP}.json
-
-git config user.name  "Eter-Bot"
-git config user.email "eter@ai.local"
-
-git add business_analysis_${TIMESTAMP}.json
-git commit -m "Dodano wynik analizy biznesowej (${TIMESTAMP})" || echo "Brak nowych plików"
-git push origin HEAD:analysis-branch
+          echo "${{ steps.analizaBiznesowa.outputs.businessAnalysisResult }}" | jq . > business_analysis_${TIMESTAMP}.json
+          git config user.name  "Eter-Bot"
+          git config user.email "eter@ai.local"
+          git add business_analysis_${TIMESTAMP}.json
+          git commit -m "Dodano wynik analizy biznesowej (${TIMESTAMP})" || echo "Brak nowych plików"
+          git push origin HEAD:analysis-branch
