@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 # Prevent the bot's own commits from triggering the workflow again
 concurrency:
