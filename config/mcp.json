@@ -1,0 +1,102 @@
+{
+  "mcpVersion": "1.0.0",
+  "gateway": {
+    "name": "Multiplexer Resonance MCP Gateway",
+    "description": "Network archaeology gateway with Kali Linux tools",
+    "version": "1.0.0",
+    "author": "Multiplexer Resonance Team"
+  },
+  "security": {
+    "enableRateLimiting": true,
+    "maxRequestsPerMinute": 100,
+    "requireAuthentication": false,
+    "allowedOrigins": ["*"],
+    "enableCORS": true,
+    "trustedProxies": ["127.0.0.1", "::1"]
+  },
+  "tools": {
+    "nmap": {
+      "enabled": true,
+      "maxHosts": 256,
+      "maxPorts": 1000,
+      "defaultTimeout": 300,
+      "allowedScanTypes": ["quick", "full", "stealth", "udp", "service"]
+    },
+    "netcat": {
+      "enabled": true,
+      "maxConnectionTime": 60,
+      "allowedProtocols": ["tcp", "udp"]
+    },
+    "dig": {
+      "enabled": true,
+      "cacheTTL": 3600,
+      "defaultDNSServer": "8.8.8.8",
+      "allowedRecordTypes": ["A", "AAAA", "MX", "NS", "TXT", "CNAME", "SOA", "ANY"]
+    },
+    "whois": {
+      "enabled": true,
+      "cacheTTL": 3600,
+      "rateLimit": 10
+    },
+    "curl": {
+      "enabled": true,
+      "maxResponseSize": "10mb",
+      "timeout": 30,
+      "followRedirects": true,
+      "maxRedirects": 5
+    },
+    "traceroute": {
+      "enabled": true,
+      "maxHops": 30,
+      "timeout": 60
+    },
+    "wget": {
+      "enabled": true,
+      "maxFileSize": "100mb",
+      "outputDirectory": "/app/data/",
+      "allowRecursive": true
+    },
+    "whatweb": {
+      "enabled": true,
+      "maxAggressionLevel": 4,
+      "timeout": 30
+    }
+  },
+  "integrations": {
+    "chromadb": {
+      "enabled": true,
+      "host": "localhost",
+      "port": 8001,
+      "collection": "network_archaeology",
+      "autoStore": true
+    },
+    "gemini": {
+      "enabled": true,
+      "model": "gemini-2.5-pro",
+      "maxTokens": 8192
+    },
+    "claude": {
+      "enabled": true,
+      "model": "claude-sonnet-4-5-20250929",
+      "maxTokens": 4096
+    },
+    "cloudflare": {
+      "enabled": false,
+      "tunnelEnabled": false
+    }
+  },
+  "logging": {
+    "level": "info",
+    "directory": "/app/logs",
+    "maxFileSize": "50mb",
+    "maxFiles": 5,
+    "logToConsole": true,
+    "logToFile": true
+  },
+  "monitoring": {
+    "enableMetrics": true,
+    "metricsEndpoint": "/metrics",
+    "healthCheckEndpoint": "/health",
+    "healthCheckInterval": 30
+  }
+}

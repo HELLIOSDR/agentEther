@@ -1,0 +1,120 @@
+# Rclone Ignore File for Spectrum Protocol 2026
+# Files and directories to exclude from Google Drive sync
+
+# ============================================
+# Git and Version Control
+# ============================================
+.git/
+.gitignore
+.gitattributes
+
+# ============================================
+# Secrets and Credentials (CRITICAL!)
+# ============================================
+.env
+.env.*
+!.env.example
+!.env.template
+**/.env
+**/.env.*
+.env.backups/
+*.key
+*.pem
+*.p12
+*.pfx
+config/*.key
+config/*.pem
+config/.secrets
+service-account-*.json
+rclone.conf
+
+# ============================================
+# Docker Runtime
+# ============================================
+.docker/
+docker-compose.override.yml
+!environments/**/docker-compose.override.yml
+
+# ============================================
+# Logs (exclude large log files)
+# ============================================
+logs/*.log
+logs/**/*.log
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================
+# Data and Caches
+# ============================================
+node_modules/
+.npm/
+.cache/
+.tmp/
+temp/
+tmp/
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# IDE and Editors
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.project
+.classpath
+.settings/
+
+# ============================================
+# Build Artifacts
+# ============================================
+dist/
+build/
+*.compiled
+*.o
+*.so
+*.exe
+*.dll
+
+# ============================================
+# Large Files and Media (optional)
+# ============================================
+# Uncomment if you want to exclude large files
+# *.mp4
+# *.avi
+# *.mov
+# *.zip
+# *.tar.gz
+# *.iso
+
+# ============================================
+# Exclude ChromaDB data (too large, backup separately)
+# ============================================
+chromadb-memory/
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# Temporary Docker volumes
+# ============================================
+data/cache/
+data/temp/
+data/tmp/
+
+# Note: .gitkeep files ARE synced to preserve directory structure

@@ -40,3 +40,8 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Rclone (Google Drive sync)
+rclone.conf
+.rclone.conf
+service-account-*.json
