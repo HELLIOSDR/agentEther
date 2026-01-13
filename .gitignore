@@ -1,0 +1,37 @@
+# Environment variables
+.env
+.env.local
+
+# Logs
+logs/*
+!logs/.gitkeep
+*.log
+npm-debug.log*
+
+# Data directory
+data/*
+!data/.gitkeep
+
+# Config secrets
+config/*.key
+config/*.pem
+config/.secrets
+
+# Node modules
+node_modules/
+
+# ChromaDB memory (external volume)
+chromadb-memory/
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

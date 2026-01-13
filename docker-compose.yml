@@ -1,0 +1,66 @@
+# Spectrum Protocol 2026 - Stabilized Kernel Architecture
+# Fixed issues: Profile blocking tunnel, restricted ALLOWED_HOSTS, healthcheck timing.
+
+services:
+  mcp-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: multiplexer-mcp-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./config:/app/config:ro
+      - ../chromadb-memory:/app/chromadb:ro
+    environment:
+      - NODE_ENV=production
+      - MCP_PORT=3000
+      - SOCKET_MCP_PORT=3001
+      - LOG_LEVEL=info
+
+      # FIX: Added internal service name and external domain to ALLOWED_HOSTS
+      - ALLOWED_HOSTS=localhost,127.0.0.1,mcp-gateway,api.geminiswiss1909.online
+
+      - ENABLE_SOCKET_MCP=true
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+    networks:
+      - multiplexer-network
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5 # Increased retries
+      start_period: 60s # More time for Kali tools to initialize
+
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: multiplexer-cloudflare-tunnel
+    restart: unless-stopped
+    # FIX: Removed profiles. Now tunnel starts automatically with the gateway.
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}
+    networks:
+      - multiplexer-network
+    depends_on:
+      mcp-gateway:
+        condition: service_healthy # Wait for gateway to be fully ready
+    # profiles: - cloudflare  <-- REMOVED TO FIX [FAIL] STATUS
+
+networks:
+  multiplexer-network:
+    name: multiplexer-network
+    driver: bridge
