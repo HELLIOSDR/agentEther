@@ -117,4 +117,14 @@ data/cache/
 data/temp/
 data/tmp/
 
+# ============================================
+# Coordination (sync state, exclude backups/locks)
+# ============================================
+coordination/*.bak
+coordination/*.backup
+coordination/*.tmp
+coordination/locks/*.lock
+# Include: state.json, tasks.json, messages/*.json
+# Exclude: temporary and runtime files
+
 # Note: .gitkeep files ARE synced to preserve directory structure

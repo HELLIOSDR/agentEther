@@ -101,6 +101,31 @@ When working across environments:
    ./switch-env.sh <target-environment>
    ```
 
+### Claude Coordination Protocol 🤝
+
+For seamless collaboration between Claude instances in different environments, use the **Claude Coordination Protocol (CCP)**:
+
+```bash
+# Check coordination status
+./coordination/dashboard.sh
+
+# Send message to other environment
+./coordination/send-message.sh --to anthropic --subject "Status update" --body "Working on feature X"
+
+# Sync everything
+./coordination/sync-all.sh
+```
+
+Features:
+- ✅ **Shared state** across environments via Google Drive
+- ✅ **Asynchronous messaging** between Claude instances
+- ✅ **Task coordination** and assignment
+- ✅ **Real-time status** monitoring
+- ✅ **MCP Gateway integration** for cross-environment communication
+
+**Quick Start:** See [coordination/QUICKSTART.md](coordination/QUICKSTART.md)
+**Full Documentation:** See [coordination/README.md](coordination/README.md)
+
 ## Setup Instructions
 
 ### 1. Clone and Configure

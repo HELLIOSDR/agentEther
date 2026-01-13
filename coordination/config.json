@@ -1,0 +1,24 @@
+{
+  "environmentName": "swissai",
+  "region": "eu-central",
+  "workspace": "geminiswiss",
+  "syncInterval": 300,
+  "heartbeatInterval": 60,
+  "mcpGatewayUrl": "https://api.geminiswiss1909.online",
+  "mcpGatewayLocalUrl": "http://localhost:3000",
+  "chromaDbUrl": "http://localhost:8001",
+  "gdriveRemote": "agentether-gdrive",
+  "coordinationPath": "coordination/",
+  "capabilities": [
+    "git",
+    "docker-compose",
+    "mcp-gateway",
+    "cloudflare-tunnel"
+  ],
+  "notifications": {
+    "enabled": true,
+    "onNewMessage": true,
+    "onTaskAssigned": true,
+    "onIssueCreated": true
+  }
+}

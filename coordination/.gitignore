@@ -1,0 +1,28 @@
+# Coordination runtime files - DO NOT COMMIT
+
+# Messages (may contain sensitive information)
+messages/*.json
+!messages/.gitkeep
+
+# Locks (runtime state)
+locks/*.lock
+!locks/.gitkeep
+
+# Backups
+*.bak
+*.backup
+
+# Temporary files
+*.tmp
+.*.swp
+
+# State files (will be synced via Google Drive)
+# Uncomment if you want to commit initial state
+# state.json
+# tasks.json
+
+# Local configuration overrides
+config.local.json
+
+# Debug logs
+*.log
