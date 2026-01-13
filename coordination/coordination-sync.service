@@ -1,0 +1,23 @@
+[Unit]
+Description=Claude Coordination Protocol Sync Daemon
+After=network.target
+
+[Service]
+Type=forking
+User=%i
+WorkingDirectory=/home/user/agentEther
+ExecStart=/home/user/agentEther/coordination/sync-daemon.sh start
+ExecStop=/home/user/agentEther/coordination/sync-daemon.sh stop
+PIDFile=/tmp/coordination-sync-daemon.pid
+Restart=on-failure
+RestartSec=10
+
+# Environment
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+
+# Logging
+StandardOutput=append:/home/user/agentEther/logs/coordination-sync.log
+StandardError=append:/home/user/agentEther/logs/coordination-sync-error.log
+
+[Install]
+WantedBy=multi-user.target
