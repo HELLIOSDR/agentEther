@@ -1,0 +1,72 @@
+{
+  "version": "1.0.0",
+  "protocol": "Claude Coordination Protocol",
+  "lastUpdate": "2026-01-13T10:06:00Z",
+  "environments": {
+    "swissai": {
+      "name": "SWISSAI (EU Central)",
+      "status": "active",
+      "lastSeen": "2026-01-13T10:06:00Z",
+      "currentTask": "completed-coordination-protocol-setup",
+      "branch": "claude/fix-kernel-stability-1oIFj",
+      "commit": "48559cc",
+      "region": "eu-central",
+      "workspace": "geminiswiss",
+      "capabilities": [
+        "git",
+        "docker-compose",
+        "mcp-gateway",
+        "cloudflare-tunnel"
+      ]
+    },
+    "anthropic": {
+      "name": "Anthropic Cloud (US East)",
+      "status": "idle",
+      "lastSeen": null,
+      "currentTask": null,
+      "branch": "claude/fix-kernel-stability-1oIFj",
+      "commit": "48559cc",
+      "region": "us-east",
+      "workspace": "anthropic-cloud",
+      "capabilities": [
+        "git",
+        "docker-compose",
+        "mcp-gateway"
+      ]
+    }
+  },
+  "sharedContext": {
+    "projectName": "agentEther",
+    "protocol": "Spectrum Protocol 2026",
+    "mcpGatewayUrl": "https://api.geminiswiss1909.online",
+    "mcpGatewayLocalUrl": "http://localhost:3000",
+    "chromaDbUrl": "http://localhost:8001",
+    "chromaDbEnabled": true,
+    "gdriveFolder": "1z3r8stAmWPy2ysyI8dhKjIvPMoClfEbo",
+    "currentBranch": "claude/fix-kernel-stability-1oIFj"
+  },
+  "activeIssues": [
+    {
+      "id": "issue-001",
+      "title": "Restart cloudflared service",
+      "priority": "high",
+      "assignedTo": null,
+      "status": "open",
+      "description": "Need to restart cloudflared on host system. Docker/systemd not available in CLI environment.",
+      "createdAt": "2026-01-13T10:15:00Z",
+      "createdBy": "swissai",
+      "tags": [
+        "cloudflare",
+        "infrastructure",
+        "urgent"
+      ]
+    }
+  ],
+  "locks": {},
+  "statistics": {
+    "totalMessages": 0,
+    "totalTasks": 0,
+    "lastSync": "2026-01-13T10:06:00Z",
+    "syncCount": 1
+  }
+}

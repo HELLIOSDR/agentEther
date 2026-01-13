@@ -1,0 +1,58 @@
+tunnel: geminiswiss1909-tunnel
+credentials-file: /home/a/.cloudflared/geminiswiss1909-tunnel.json
+
+# Ingress rules - order matters! More specific rules first
+ingress:
+  # Main MCP Gateway - primary service
+  - hostname: api.geminiswiss1909.online
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+      httpHostHeader: api.geminiswiss1909.online
+
+  # n8n Automation - workflow automation
+  - hostname: n8n.geminiswiss1909.online
+    service: http://localhost:5678
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+      httpHostHeader: n8n.geminiswiss1909.online
+
+  # ChromaDB Admin Interface (optional) - uncomment to enable
+  # - hostname: chromadb.geminiswiss1909.online
+  #   service: http://localhost:8000
+  #   originRequest:
+  #     noTLSVerify: true
+  #     connectTimeout: 30s
+  #     httpHostHeader: chromadb.geminiswiss1909.online
+
+  # Root domain - redirect to API or landing page
+  - hostname: geminiswiss1909.online
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: true
+
+  # Wildcard subdomain - redirect to API (catch-all)
+  - hostname: "*.geminiswiss1909.online"
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: true
+
+  # Catch-all rule (required) - returns 404 for unmatched requests
+  - service: http_status:404
+
+# Optional: Enable metrics for monitoring
+metrics: localhost:2000
+
+# Connection settings
+protocol: quic  # or http2, auto
+
+# Enable automatic retries
+retries: 5
+
+# Logging
+loglevel: info  # debug, info, warn, error
+
+# Grace period before shutdown
+grace-period: 30s

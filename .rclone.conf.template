@@ -1,0 +1,66 @@
+# Rclone Configuration Template for Spectrum Protocol 2026
+# Copy this to ~/.config/rclone/rclone.conf and fill in your credentials
+
+# Google Drive remote for agentEther project
+[agentether-gdrive]
+type = drive
+client_id = your_google_client_id_here
+client_secret = your_google_client_secret_here
+scope = drive
+token = {"access_token":"YOUR_ACCESS_TOKEN","token_type":"Bearer","refresh_token":"YOUR_REFRESH_TOKEN","expiry":"2024-12-31T23:59:59.999999999Z"}
+team_drive =
+
+# Alternative: Use service account for automation
+[agentether-gdrive-service]
+type = drive
+scope = drive
+service_account_file = /path/to/service-account-key.json
+team_drive =
+
+# ============================================
+# Configuration Options
+# ============================================
+
+# For better performance, you can add these options:
+# uploads = true
+# acknowledge_abuse = false
+# keep_revision_forever = false
+# size_only = false
+# skip_gdocs = true
+# skip_checksum_gphotos = false
+# shared_with_me = false
+# trashed_only = false
+# starred_only = false
+# formats =
+
+# ============================================
+# Setup Instructions
+# ============================================
+
+# 1. Install rclone (if not already installed):
+#    curl https://rclone.org/install.sh | sudo bash
+
+# 2. Configure Google Drive remote:
+#    rclone config
+#    - Choose: n (New remote)
+#    - Name: agentether-gdrive
+#    - Type: drive (Google Drive)
+#    - Follow OAuth flow
+
+# 3. Test connection:
+#    rclone lsd agentether-gdrive:
+
+# 4. Create project folder on Google Drive:
+#    rclone mkdir agentether-gdrive:agentEther
+
+# 5. Test sync:
+#    ./sync-gdrive.sh backup
+
+# ============================================
+# Security Notes
+# ============================================
+
+# - NEVER commit ~/.config/rclone/rclone.conf to git
+# - Store service account keys securely
+# - Use encryption for sensitive data: rclone crypt
+# - Consider using environment variables for credentials

@@ -1,0 +1,78 @@
+{
+  "mcpServers": {
+    "mcp-gateway": {
+      "url": "http://localhost:3000/sse",
+      "transport": "sse"
+    },
+    "gemini-superassistant": {
+      "command": "python3",
+      "args": ["/home/user/agentEther/mcp-servers/gemini-superassistant/server.py"],
+      "env": {
+        "API_BASE_URL": "https://generativelanguage.googleapis.com/v1beta",
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}",
+        "GEMINI_MODEL": "gemini-2.0-flash",
+        "GEMINI_TIMEOUT_MS": "60000",
+        "OLLAMA_URL": "http://localhost:11434",
+        "OLLAMA_MODEL": "llama3.2:3b"
+      }
+    },
+    "coordination": {
+      "command": "python3",
+      "args": ["/home/user/agentEther/mcp-servers/coordination/server.py"],
+      "env": {
+        "CHROMADB_HOST": "localhost",
+        "CHROMADB_PORT": "8001"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/agentEther"],
+      "env": {}
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "/home/user/agentEther"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "env": {}
+    },
+    "grafana": {
+      "command": "npx",
+      "args": ["-y", "@grafana/mcp-grafana"],
+      "env": {
+        "GRAFANA_URL": "http://localhost:3001",
+        "GRAFANA_API_KEY": "${GRAFANA_API_KEY}"
+      }
+    },
+    "openai-assistant": {
+      "command": "python3",
+      "args": ["/home/user/agentEther/mcp-servers/openai-assistant/server.py"],
+      "env": {
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "OPENAI_MODEL": "gpt-4-turbo-preview",
+        "OPENAI_TEMPERATURE": "0.7",
+        "OPENAI_MAX_TOKENS": "4096"
+      }
+    },
+    "claude-api": {
+      "command": "python3",
+      "args": ["/home/user/agentEther/mcp-servers/claude-api/server.py"],
+      "env": {
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "CLAUDE_MODEL": "claude-3-5-sonnet-20241022",
+        "CLAUDE_TEMPERATURE": "1.0",
+        "CLAUDE_MAX_TOKENS": "4096"
+      }
+    }
+  }
+}

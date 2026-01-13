@@ -1,0 +1,135 @@
+# Spectrum Protocol 2026 - Stabilized Kernel Architecture
+# Multiplexer Resonance MCP Gateway
+# Fixed issues: Profile blocking tunnel, restricted ALLOWED_HOSTS, healthcheck timing.
+
+services:
+  mcp-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: multiplexer-mcp-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"  # MCP Server port
+      - "3001:3001"  # Socket MCP port (if enabled)
+    volumes:
+      # Persistent storage for logs and data
+      - ./logs:/app/logs
+      - ./data:/app/data
+      # Configuration files (read-only)
+      - ./config:/app/config:ro
+      # ChromaDB integration (shared memory)
+      - ../chromadb-memory:/app/chromadb:ro
+    environment:
+      # MCP Gateway Configuration
+      - NODE_ENV=production
+      - MCP_PORT=3000
+      - SOCKET_MCP_PORT=3001
+      - LOG_LEVEL=info
+
+      # Security settings
+      - MAX_SCAN_TIMEOUT=300000
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW=60000
+      - ENABLE_SOCKET_MCP=true
+
+      # FIX: Added internal service name and external domain to ALLOWED_HOSTS
+      - ALLOWED_HOSTS=localhost,127.0.0.1,mcp-gateway,geminiswiss1909.online,api.geminiswiss1909.online
+
+      # Tool-specific settings
+      - NMAP_MAX_HOSTS=256
+      - NMAP_MAX_PORTS=1000
+      - WHOIS_CACHE_TTL=3600
+      - DNS_RESOLVER=8.8.8.8
+
+      # AI Model integration
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+
+      # CloudFlare tunnel (optional)
+      - CLOUDFLARE_TUNNEL_ID=${CLOUDFLARE_TUNNEL_ID:-}
+      - CLOUDFLARE_TOKEN=${CLOUDFLARE_TOKEN:-}
+
+      # ChromaDB connection
+      - CHROMADB_HOST=host.docker.internal
+      - CHROMADB_PORT=8001
+      - CHROMADB_COLLECTION=network_archaeology
+
+    networks:
+      - multiplexer-network
+    # Network mode: use bridge with capabilities instead of host
+
+    # Capabilities for network tools
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    # Resource limits with reservations
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+    # Health check - FIX: Increased timing for tool initialization
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5  # Increased from 3
+      start_period: 60s  # Increased from 40s for Kali tools
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # CloudFlare tunnel - FIX: Removed profiles, always starts
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: multiplexer-cloudflare-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}
+    networks:
+      - multiplexer-network
+    depends_on:
+      mcp-gateway:
+        condition: service_healthy  # Wait for gateway to be fully ready
+    # profiles: - cloudflare  <-- REMOVED TO FIX [FAIL] STATUS
+
+  # Optional: ChromaDB local instance
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: multiplexer-chromadb
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    volumes:
+      - ../chromadb-memory:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - multiplexer-network
+    profiles:
+      - local-chromadb
+
+networks:
+  multiplexer-network:
+    name: multiplexer-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  logs:
+  data:

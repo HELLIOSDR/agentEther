@@ -1,0 +1,47 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.template
+.env.backups/
+
+# Logs
+logs/*
+!logs/.gitkeep
+*.log
+npm-debug.log*
+
+# Data directory
+data/*
+!data/.gitkeep
+
+# Config secrets
+config/*.key
+config/*.pem
+config/.secrets
+
+# Node modules
+node_modules/
+
+# ChromaDB memory (external volume)
+chromadb-memory/
+
+# Docker
+.docker/
+docker-compose.override.yml
+!environments/**/docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Rclone (Google Drive sync)
+rclone.conf
+.rclone.conf
+service-account-*.json

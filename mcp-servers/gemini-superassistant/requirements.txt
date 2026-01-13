@@ -1,0 +1,14 @@
+# Gemini Superassistant MCP Server - Dependencies
+# Spectrum Protocol 2026 - agentEther
+
+# MCP SDK
+mcp>=0.9.0
+
+# Async HTTP client
+httpx>=0.27.0
+
+# Standard library (included in Python 3.10+)
+# - asyncio
+# - json
+# - pathlib
+# - typing

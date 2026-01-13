@@ -1,0 +1,13 @@
+{
+  "id": "msg-XXXXX",
+  "from": "source-environment",
+  "to": "target-environment",
+  "timestamp": "2026-01-13T10:00:00Z",
+  "type": "message",
+  "subject": "Message subject",
+  "body": "Message body text",
+  "priority": "normal",
+  "replyTo": null,
+  "status": "unread",
+  "attachments": []
+}
