@@ -1,0 +1,26 @@
+# Spectrum Protocol 2026 - SWISSAI Environment Override
+# This file extends docker-compose.yml for SWISSAI/geminiswiss deployment
+
+version: '3.8'
+
+services:
+  mcp-gateway:
+    environment:
+      # SWISSAI specific configuration
+      - ENVIRONMENT=swissai
+      - ALLOWED_HOSTS=localhost,127.0.0.1,mcp-gateway,api.geminiswiss1909.online,swissai.internal
+
+    # SWISSAI specific resource limits (can be adjusted)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  cloudflare-tunnel:
+    environment:
+      # SWISSAI tunnel configuration
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN_SWISSAI}

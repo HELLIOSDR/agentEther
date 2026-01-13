@@ -57,6 +57,50 @@ This release addresses three critical kernel stability issues:
 - Cloudflare Tunnel token
 - API keys for Gemini and Claude
 
+## Multi-Environment Support 🌐
+
+This project supports multiple Claude Code environments:
+
+- **SWISSAI** - geminiswiss workspace (EU Central)
+- **Anthropic Cloud** - Standard Anthropic workspace (US East)
+
+### Quick Environment Switch
+
+```bash
+# Switch to SWISSAI environment
+./switch-env.sh swissai
+
+# Switch to Anthropic Cloud environment
+./switch-env.sh anthropic
+```
+
+Each environment has:
+- Dedicated configuration in `environments/<env>/`
+- Environment-specific `.env.template`
+- Custom `docker-compose.override.yml`
+- Detailed documentation in `environments/<env>/README.md`
+
+### Environment Synchronization
+
+When working across environments:
+
+1. **Commit changes in one environment:**
+   ```bash
+   git add .
+   git commit -m "Your changes"
+   git push origin claude/fix-kernel-stability-1oIFj
+   ```
+
+2. **Switch to another environment in Claude Code:**
+   - Click environment selector
+   - Choose target environment (SWISSAI or anthropic cloud)
+
+3. **Pull and apply configuration:**
+   ```bash
+   git pull origin claude/fix-kernel-stability-1oIFj
+   ./switch-env.sh <target-environment>
+   ```
+
 ## Setup Instructions
 
 ### 1. Clone and Configure
@@ -65,8 +109,8 @@ This release addresses three critical kernel stability issues:
 git clone <repository-url>
 cd agentEther
 
-# Copy environment template
-cp .env.example .env
+# Choose your environment (swissai or anthropic)
+./switch-env.sh swissai
 
 # Edit .env with your credentials
 nano .env
