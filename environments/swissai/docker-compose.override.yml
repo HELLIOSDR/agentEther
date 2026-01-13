@@ -6,11 +6,45 @@ version: '3.8'
 services:
   mcp-gateway:
     environment:
-      # SWISSAI specific configuration
+      # SWISSAI Environment Identifier
       - ENVIRONMENT=swissai
-      - ALLOWED_HOSTS=localhost,127.0.0.1,mcp-gateway,api.geminiswiss1909.online,swissai.internal
 
-    # SWISSAI specific resource limits (can be adjusted)
+      # MCP Gateway Configuration
+      - NODE_ENV=production
+      - MCP_PORT=3000
+      - SOCKET_MCP_PORT=3001
+      - LOG_LEVEL=info
+
+      # Security Configuration
+      - MAX_SCAN_TIMEOUT=300000
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW=60000
+      - ENABLE_SOCKET_MCP=true
+
+      # SWISSAI specific hosts
+      - ALLOWED_HOSTS=localhost,127.0.0.1,mcp-gateway,swissai.internal,geminiswiss1909.online,api.geminiswiss1909.online
+
+      # Tool Configuration
+      - NMAP_MAX_HOSTS=256
+      - NMAP_MAX_PORTS=1000
+      - WHOIS_CACHE_TTL=3600
+      - DNS_RESOLVER=8.8.8.8
+
+      # AI Model API Keys
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+
+      # ChromaDB Configuration
+      - CHROMADB_HOST=host.docker.internal
+      - CHROMADB_PORT=8001
+      - CHROMADB_COLLECTION=network_archaeology
+
+      # SWISSAI Workspace Configuration
+      - WORKSPACE_ID=swissai-geminiswiss
+      - DEPLOYMENT_REGION=eu-central
+
+    # SWISSAI specific resource limits
     deploy:
       resources:
         limits:
@@ -22,5 +56,5 @@ services:
 
   cloudflare-tunnel:
     environment:
-      # SWISSAI tunnel configuration
-      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN_SWISSAI}
+      # SWISSAI Cloudflare tunnel configuration
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}

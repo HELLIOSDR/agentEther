@@ -6,9 +6,43 @@ version: '3.8'
 services:
   mcp-gateway:
     environment:
-      # Anthropic Cloud specific configuration
+      # Anthropic Cloud Environment Identifier
       - ENVIRONMENT=anthropic
-      - ALLOWED_HOSTS=localhost,127.0.0.1,mcp-gateway,api.geminiswiss1909.online
+
+      # MCP Gateway Configuration
+      - NODE_ENV=production
+      - MCP_PORT=3000
+      - SOCKET_MCP_PORT=3001
+      - LOG_LEVEL=info
+
+      # Security Configuration
+      - MAX_SCAN_TIMEOUT=300000
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW=60000
+      - ENABLE_SOCKET_MCP=true
+
+      # Anthropic Cloud specific hosts
+      - ALLOWED_HOSTS=localhost,127.0.0.1,mcp-gateway,geminiswiss1909.online,api.geminiswiss1909.online
+
+      # Tool Configuration
+      - NMAP_MAX_HOSTS=256
+      - NMAP_MAX_PORTS=1000
+      - WHOIS_CACHE_TTL=3600
+      - DNS_RESOLVER=8.8.8.8
+
+      # AI Model API Keys
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+
+      # ChromaDB Configuration
+      - CHROMADB_HOST=host.docker.internal
+      - CHROMADB_PORT=8001
+      - CHROMADB_COLLECTION=network_archaeology
+
+      # Anthropic Cloud Workspace Configuration
+      - WORKSPACE_ID=anthropic-cloud
+      - DEPLOYMENT_REGION=us-east
 
     # Anthropic Cloud resource limits
     deploy:
@@ -22,5 +56,5 @@ services:
 
   cloudflare-tunnel:
     environment:
-      # Anthropic tunnel configuration
-      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN_ANTHROPIC}
+      # Anthropic Cloud Cloudflare tunnel configuration
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}
