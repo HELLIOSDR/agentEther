@@ -157,6 +157,57 @@ docker-compose ps
 | Socket MCP | 3001 | WebSocket endpoint |
 | Cloudflare Tunnel | Dynamic | Public HTTPS access |
 
+## MCP Client Setup (Claude Desktop/Code)
+
+This project provides two MCP servers for integration with Claude Desktop or Claude Code:
+
+1. **MCP Gateway** - Network archaeology tools (nmap, dig, netcat, etc.)
+2. **Gemini Superassistant** - Conversational AI with session management and Ollama fallback
+
+### Quick Setup
+
+Configure Claude Desktop to connect to the MCP servers:
+
+**Configuration file location:**
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "mcp-gateway": {
+      "url": "http://localhost:3000/sse",
+      "transport": "sse"
+    },
+    "gemini-superassistant": {
+      "command": "python3",
+      "args": ["/home/user/agentEther/mcp-servers/gemini-superassistant/server.py"],
+      "env": {
+        "GEMINI_API_KEY": "your_actual_api_key_here",
+        "GEMINI_MODEL": "gemini-2.0-flash",
+        "OLLAMA_URL": "http://localhost:11434"
+      }
+    }
+  }
+}
+```
+
+**Important:** Replace `your_actual_api_key_here` with your real Gemini API key from https://makersuite.google.com/app/apikey
+
+### Available Tools
+
+Once connected, Claude can use:
+- **Network tools**: nmap, dig, whois, traceroute, netcat
+- **HTTP tools**: curl, wget, whatweb
+- **AI tools**: Gemini chat with persistent sessions
+
+### Documentation
+
+For complete setup instructions, troubleshooting, and advanced configuration, see **[MCP-SETUP.md](MCP-SETUP.md)**.
+
 ## Health Monitoring
 
 The gateway includes a health check endpoint:
