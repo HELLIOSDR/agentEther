@@ -1,0 +1,29 @@
+# Cloudflare Tunnel - Git Exclusions
+
+# Credentials (CRITICAL - NEVER COMMIT!)
+*.json
+credentials.json
+geminiswiss1909-tunnel.json
+cert.pem
+
+# Systemd service files (contain paths)
+cloudflared.service
+cloudflared-*.service
+
+# Backups
+tunnel-backups/
+backups/
+*.bak
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# Scripts output
+health-check-*.txt
+maintain-*.txt

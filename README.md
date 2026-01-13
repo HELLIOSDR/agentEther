@@ -195,6 +195,48 @@ The gateway container includes:
 - Verify hostname matches one of: localhost, 127.0.0.1, mcp-gateway, api.geminiswiss1909.online
 - Check request headers for Host field
 
+## Cloudflare Tunnel (Public Access)
+
+The project includes Cloudflare Tunnel configuration for secure public access without opening firewall ports.
+
+### Services Available
+
+- **MCP Gateway**: https://api.geminiswiss1909.online
+- **n8n Automation**: https://n8n.geminiswiss1909.online (optional)
+- **Root Domain**: https://geminiswiss1909.online
+
+### Quick Setup
+
+```bash
+# 1. Install cloudflared
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+sudo mv cloudflared /usr/local/bin/
+sudo chmod +x /usr/local/bin/cloudflared
+
+# 2. Authenticate
+cloudflared tunnel login
+
+# 3. Use included configuration
+cd cloudflare/
+cloudflared tunnel --config config.yml run
+```
+
+### Configuration Files
+
+- `cloudflare/config.yml` - Main tunnel configuration
+- `cloudflare/README.md` - Complete setup guide
+- `cloudflare/INDEX.md` - Navigation and reference
+
+### Features
+
+✅ **Free SSL/TLS** - Automatic HTTPS certificates
+✅ **DDoS Protection** - Built-in Cloudflare security
+✅ **No Port Forwarding** - Works behind NAT/firewall
+✅ **Encrypted Tunnel** - QUIC protocol for speed and security
+✅ **Multi-Service** - Single tunnel for multiple services
+
+For detailed configuration, see `cloudflare/README.md`.
+
 ## Development
 
 ### Rebuild after changes
