@@ -1,0 +1,135 @@
+# Alert Rules for Spectrum Protocol 2026
+
+groups:
+  - name: spectrum_protocol_alerts
+    interval: 30s
+    rules:
+      # MCP Gateway Alerts
+      - alert: MCPGatewayDown
+        expr: up{job="mcp-gateway"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: mcp-gateway
+        annotations:
+          summary: "MCP Gateway is down"
+          description: "MCP Gateway has been down for more than 2 minutes."
+
+      - alert: MCPGatewayHighErrorRate
+        expr: rate(http_requests_total{job="mcp-gateway",status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: mcp-gateway
+        annotations:
+          summary: "MCP Gateway high error rate"
+          description: "MCP Gateway error rate is above 5% for 5 minutes."
+
+      - alert: MCPGatewayHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mcp-gateway"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: mcp-gateway
+        annotations:
+          summary: "MCP Gateway high latency"
+          description: "95th percentile latency is above 2 seconds."
+
+      # Cloudflare Tunnel Alerts
+      - alert: CloudflareTunnelDown
+        expr: cloudflare_tunnel_status == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: cloudflare-tunnel
+        annotations:
+          summary: "Cloudflare Tunnel is down"
+          description: "Cloudflare Tunnel has been down for more than 2 minutes."
+
+      # Container Alerts
+      - alert: ContainerDown
+        expr: up{job="cadvisor"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container monitoring is down"
+          description: "cAdvisor has been down for more than 2 minutes."
+
+      - alert: HighContainerCPU
+        expr: sum(rate(container_cpu_usage_seconds_total{name!=""}[5m])) by (name) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage in container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} CPU usage is above 80%."
+
+      - alert: HighContainerMemory
+        expr: (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage in container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} memory usage is above 90%."
+
+      # System Alerts
+      - alert: HighSystemLoad
+        expr: node_load1 / count without (cpu, mode) (node_cpu_seconds_total{mode="idle"}) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High system load"
+          description: "System load is above 1.5 for 5 minutes."
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space"
+          description: "Less than 10% disk space remaining on root filesystem."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 90%."
+
+      # ChromaDB Alerts
+      - alert: ChromaDBDown
+        expr: up{job="chromadb"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: chromadb
+        annotations:
+          summary: "ChromaDB is down"
+          description: "ChromaDB has been unreachable for more than 2 minutes."
+
+      # Coordination Alerts (custom metrics)
+      - alert: CoordinationSyncFailed
+        expr: coordination_sync_failures_total > 3
+        for: 5m
+        labels:
+          severity: warning
+          service: coordination
+        annotations:
+          summary: "Coordination sync failures"
+          description: "Coordination sync has failed more than 3 times in 5 minutes."
+
+      - alert: UnreadCoordinationMessages
+        expr: coordination_unread_messages > 10
+        for: 30m
+        labels:
+          severity: info
+          service: coordination
+        annotations:
+          summary: "Many unread coordination messages"
+          description: "There are {{ $value }} unread coordination messages."
