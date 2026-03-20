@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AgentEther Auto-Clicker
+Comment=Automatyczny klikacz dla pulpitu (F5=start, F6=stop)
+Exec=bash -c 'python3 ~/.local/share/agentether-clicker/clicker.py --hotkeys; echo "Naciśnij Enter aby zamknąć"; read'
+Icon=input-mouse
+Terminal=true
+Categories=Utility;
+Keywords=clicker;auto;klikacz;autoclick;
+StartupNotify=true
